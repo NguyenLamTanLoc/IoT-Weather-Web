@@ -1,0 +1,128 @@
+:root {
+  --bg: #e8eeeb;
+  --panel: #f8fbfa;
+  --ink: #12302a;
+  --ink-soft: #4d655f;
+  --line: #c9d7d1;
+  --temp: #cf5a1f;
+  --hum: #1d6fa5;
+  --forecast-zone: rgba(40, 140, 120, 0.10);
+  --ok: #2f7d4f;
+  --warn: #b8860b;
+  --alert: #c0392b;
+  --font: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  padding: clamp(14px, 3vw, 32px);
+  max-width: 1240px;
+  margin-inline: auto;
+  font-family: var(--font);
+  color: var(--ink);
+  line-height: 1.5;
+}
+h1, h2, p { margin: 0; }
+h1 { font-size: clamp(1.3rem, 2.6vw, 1.7rem); font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 1rem; font-weight: 600; }
+:focus-visible { outline: 3px solid var(--hum); outline-offset: 2px; }
+
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+.where { color: var(--ink-soft); font-size: 0.95rem; }
+
+.status {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--panel); font-size: 0.9rem; white-space: nowrap;
+}
+.status .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-soft); }
+.status[data-state="online"] .dot { background: var(--ok); }
+.status[data-state="offline"] .dot { background: var(--alert); }
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 1fr) minmax(0, 3fr);
+  grid-template-areas:
+    "temp chart"
+    "hum  chart"
+    "advice table";
+  gap: 16px;
+}
+.reading--temp { grid-area: temp; }
+.reading--hum { grid-area: hum; }
+.chart-panel { grid-area: chart; }
+.advice { grid-area: advice; }
+.forecast-table { grid-area: table; }
+.advice, .forecast-table { grid-column: auto; }
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+/* Số đo hiện tại */
+.reading { display: flex; flex-direction: column; justify-content: space-between; min-height: 170px; border-left-width: 6px; }
+.reading--temp { border-left-color: var(--temp); }
+.reading--hum { border-left-color: var(--hum); }
+.reading h2 { color: var(--ink-soft); font-weight: 500; }
+.value { font-size: clamp(3.4rem, 7vw, 4.8rem); font-weight: 800; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.reading--temp .value { color: var(--temp); }
+.reading--hum .value { color: var(--hum); }
+.unit { font-size: 0.4em; font-weight: 600; margin-left: 4px; letter-spacing: 0; }
+.outlook { font-size: 0.92rem; color: var(--ink-soft); }
+.outlook strong { color: var(--ink); font-weight: 600; }
+
+/* Biểu đồ */
+.chart-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+.hint { font-size: 0.85rem; color: var(--ink-soft); }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+.tab {
+  font: inherit; font-size: 0.88rem; padding: 6px 14px; border: 0; background: transparent;
+  color: var(--ink-soft); cursor: pointer;
+}
+.tab + .tab { border-left: 1px solid var(--line); }
+.tab:hover { background: #eef4f1; }
+.tab[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.canvas-wrap { position: relative; height: clamp(300px, 46vh, 440px); }
+
+.export { margin-top: 10px; font-size: 0.88rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.export a { color: var(--ink); font-weight: 600; text-underline-offset: 3px; }
+
+/* Gợi ý: màu viền trái mã hoá mức độ */
+.advice-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.advice-item { border-left: 4px solid var(--line); padding: 4px 0 4px 12px; }
+.advice-item[data-level="ok"] { border-left-color: var(--ok); }
+.advice-item[data-level="warn"] { border-left-color: var(--warn); }
+.advice-item[data-level="alert"] { border-left-color: var(--alert); }
+.advice-item .title { font-weight: 600; }
+.advice-item .detail { font-size: 0.92rem; color: var(--ink-soft); }
+
+/* Bảng dự báo */
+table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 0.93rem; }
+th { font-weight: 500; color: var(--ink-soft); }
+td .range { display: block; font-size: 0.78rem; color: var(--ink-soft); }
+td.empty { color: var(--ink-soft); text-align: center; padding: 22px 6px; }
+.model { margin-top: 10px; font-size: 0.8rem; color: var(--ink-soft); }
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "temp hum"
+      "chart chart"
+      "advice advice"
+      "table table";
+  }
+  .reading { min-height: 140px; }
+}
+@media (max-width: 520px) {
+  .grid { grid-template-columns: 1fr; grid-template-areas: "temp" "hum" "chart" "advice" "table"; }
+  .top { flex-direction: column; }
+  .tabs { width: 100%; }
+  .tab { flex: 1; padding-inline: 6px; }
+}
