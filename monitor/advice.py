@@ -1,9 +1,9 @@
 """Gợi ý theo luật đơn giản dựa trên số liệu hiện tại và dự báo. Có thể thay bằng gợi ý do AI sinh ra."""
-from django.conf import settings
+from .models import AlertSetting
 
 
 def build_advice(latest, forecast):
-    th = settings.THRESHOLDS
+    th = AlertSetting.load().thresholds()
     if latest is None:
         return [{"level": "warn", "title": "Chưa có số liệu",
                  "detail": "Cảm biến chưa gửi dữ liệu nào. Kiểm tra nguồn điện và kết nối Wi-Fi của ESP32."}]

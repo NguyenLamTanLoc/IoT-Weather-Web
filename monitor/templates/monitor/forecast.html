@@ -1,0 +1,13 @@
+{% extends 'monitor/base.html' %}{% block title %}Dự báo{% endblock %}{% block content %}
+<div class="page-head"><div><h1>Dự báo khí hậu</h1><p class="sub">Nhìn trước 6 giờ để chăm sóc không gian tốt hơn.</p></div></div>
+<div class="banner" id="fcBanner">✧ Dự báo AI từ dữ liệu ESP32 · Đang tải…</div>
+<div class="grid2"><div class="card"><h2 id="fcTitle">Nhiệt độ trong 6 giờ tới</h2>
+<div class="tabs"><button class="on" data-metric="temperature">Nhiệt độ</button><button data-metric="humidity">Độ ẩm</button></div>
+<div class="chart-box"><canvas id="chart" role="img" aria-label="Biểu đồ dự báo"></canvas></div></div>
+<div class="card"><h2>Trong 6 giờ tới</h2><p class="sub" id="fcRange" style="margin:-8px 0 12px;font-size:14px">&nbsp;</p>
+<div class="kv"><span class="sub">Thấp nhất</span><b id="kMin">–</b></div><div class="kv"><span class="sub">Cao nhất</span><b id="kMax">–</b></div><div class="kv"><span class="sub">Trung bình</span><b id="kAvg">–</b></div><div class="kv"><span class="sub">Độ ẩm dự kiến</span><b class="h" id="kHum">–</b></div>
+<div class="conf"><div class="kv" style="padding:0"><span>Chênh lệch giữa 3 mô hình</span><b id="kSpread">–</b></div><p style="margin:6px 0 0;font-size:13px">Chênh lệch càng nhỏ, các mô hình càng đồng thuận.</p></div>
+<p class="sub" style="font-size:13px">Đây là giá trị dự đoán, không phải số đo thực tế. Điều kiện môi trường có thể thay đổi.</p></div></div>
+<div class="alert ok" id="fcAlert"><div><h3>Đang phân tích…</h3><p>&nbsp;</p></div><a class="btn" href="{% url 'suggestions' %}">Xem gợi ý</a></div>
+<p class="foot">Dự báo làm mới mỗi 60 giây.</p>
+{% endblock %}
