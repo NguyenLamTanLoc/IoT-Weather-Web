@@ -1,0 +1,12 @@
+{% extends 'monitor/base.html' %}{% block title %}Tổng quan{% endblock %}{% block content %}
+<div class="page-head"><div><h1>Tổng quan khí hậu</h1><p class="sub">Theo dõi không gian của bạn, chủ động với mọi thay đổi.</p></div><div class="card" style="padding:12px 24px">{{ today }}</div></div>
+<div class="grid4">
+<div class="card stat"><div class="lbl">Nhiệt độ hiện tại</div><div class="val t"><span id="tNow">–</span>°C</div><div class="note" id="tDelta">Chưa có số liệu</div></div>
+<div class="card stat"><div class="lbl">Độ ẩm hiện tại</div><div class="val h"><span id="hNow">–</span>%</div><div class="note" id="hDelta">Chưa có số liệu</div></div>
+<div class="card stat"><div class="lbl">Trạng thái</div><div class="val" id="state">–</div><div class="note" id="stateNote">&nbsp;</div></div>
+<div class="card stat"><div class="lbl">Dự báo 1 giờ tới</div><div class="val p" id="next">–</div><div class="note" id="nextNote">Chưa có dự báo</div></div></div>
+<div class="card" style="margin-bottom:24px"><div class="page-head" style="margin:0"><div><h2 style="margin:0">Diễn biến nhiệt độ &amp; độ ẩm</h2><p class="sub">Dữ liệu được cập nhật mỗi 10 giây</p></div>
+<div class="tabs" role="group" aria-label="Khoảng thời gian">{% for m, label in ranges %}<button type="button" data-range="{{ m }}" class="{% if m == 1440 %}on{% endif %}">{{ label }}</button>{% endfor %}</div></div>
+<div class="chart-box"><canvas id="chart" role="img" aria-label="Biểu đồ nhiệt độ và độ ẩm"></canvas></div></div>
+<div class="card"><div class="page-head" style="margin:0 0 16px"><h2 style="margin:0">Gợi ý nhanh</h2><a href="{% url 'suggestions' %}" class="p">Xem tất cả gợi ý</a></div><div class="quick" id="quick"><div class="q-ok">Đang phân tích số liệu…</div></div></div>
+{% endblock %}
