@@ -14,11 +14,11 @@
 <symbol id="i-leaf" viewBox="0 0 20 20"><path d="M4 16C4 9 8 4 16 3.5C16 11 12 16 5.5 16M4 16L11 9"/></symbol></defs></svg>
 <aside class="sidebar"><div class="logo"><svg class="ic"><use href="#i-leaf"/></svg>ClimateAI</div><div class="nav-label">Không gian làm việc</div>
 <nav class="nav">
-<a href="{% url 'overview' %}" class="{% if page == 'overview' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Tổng quan</a>
-<a href="{% url 'forecast' %}" class="{% if page == 'forecast' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Dự báo</a>
-<a href="{% url 'suggestions' %}" class="{% if page == 'suggestions' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg>Gợi ý</a>
-<a href="{% url 'history' %}" class="{% if page == 'history' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Lịch sử</a>
-<a href="{% url 'settings' %}" class="{% if page == 'settings' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>Cài đặt</a></nav>
+<a href="{% url 'overview' %}" class="{% if nav == 'overview' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Tổng quan</a>
+<a href="{% url 'forecast' %}" class="{% if nav == 'forecast' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Dự báo</a>
+<a href="{% url 'suggestions' %}" class="{% if nav == 'suggestions' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg>Gợi ý</a>
+<a href="{% url 'history' %}" class="{% if nav == 'history' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Lịch sử</a>
+<a href="{% url 'settings' %}" class="{% if nav == 'settings' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>Cài đặt</a></nav>
 <div class="side-status" id="sideStatus">Đang kiểm tra kết nối<b>…</b>ESP32 · Cảm biến</div><div class="version">Phiên bản 1.0 · Trợ lý khí hậu</div></aside>
 <div class="main"><header class="topbar"><label class="loc"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg><select aria-label="Không gian"><option>{{ location }}</option></select></label>
 <div class="right"><span id="updated">Đang tải…</span><span class="pill off" id="pill" role="status">Chưa có số liệu</span><div class="avatar" aria-hidden="true"></div></div></header>

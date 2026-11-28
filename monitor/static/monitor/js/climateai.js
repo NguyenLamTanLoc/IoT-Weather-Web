@@ -18,6 +18,7 @@
     $("#sideStatus").innerHTML = on
       ? `Kết nối ổn định<b>● 1 thiết bị trực tuyến</b>${esc(d.latest.device)} · Cảm biến`
       : `Chưa có kết nối<b style="color:var(--bad)">● Thiết bị ngoại tuyến</b>Kiểm tra nguồn và Wi-Fi của ESP32`;
+    if (PAGE.startsWith("csv_")) { $("#updated").textContent = "Nhập dữ liệu thô từ tệp CSV"; pill.className = "pill ok"; pill.textContent = "Nhập dữ liệu CSV"; }
     const dp = $("#devPill"); if (dp) { dp.className = pill.className; dp.textContent = on ? "Trực tuyến" : "Ngoại tuyến"; }
   }
 
@@ -75,7 +76,8 @@
   /* ---- Dự báo ---- */
   function forecast(d) {
     const pts = d.forecast.points, t = metric === "temperature", c = t ? C.temp : C.hum, u = t ? "°C" : "%", dg = t ? 1 : 0, lo = t ? "t_lo" : "h_lo", hi = t ? "t_hi" : "h_hi";
-    $("#fcBanner").textContent = pts.length ? `✧ Dự báo AI (${d.forecast.model}) · Cập nhật lúc ${hhmm(d.now)} · Từ ${hhmm(pts[0].t)} đến ${hhmm(pts[pts.length - 1].t)}`
+    const csvBanner = d.source === "csv" ? `✧ Nguồn: tệp CSV · ${d.count} bản ghi · Dữ liệu kết thúc lúc ${hhmm(d.now)} · Không ảnh hưởng dữ liệu trực tiếp` : null;
+    $("#fcBanner").textContent = csvBanner || pts.length ? `✧ Dự báo AI (${d.forecast.model}) · Cập nhật lúc ${hhmm(d.now)} · Từ ${hhmm(pts[0].t)} đến ${hhmm(pts[pts.length - 1].t)}`
       : `✧ ${d.forecast.error || "Chưa có dự báo. Cần có số liệu từ cảm biến ESP32."}`;
     $("#fcTitle").textContent = `${t ? "Nhiệt độ" : "Độ ẩm"} trong 6 giờ tới`;
     const band = (k) => (pts.length && d.latest ? [{ x: d.latest.t, y: d.latest[metric] }, ...pts.map((p) => ({ x: p.t, y: p[k] }))] : []);
@@ -120,5 +122,22 @@
   $$(".thr").forEach((t) => { const [lo, hi] = t.querySelectorAll(".num"), bar = t.querySelector(".range i"), max = +t.dataset.max;
     const up = () => { bar.style.marginLeft = Math.max(0, lo.value / max * 100) + "%"; bar.style.width = Math.max(0, (hi.value - lo.value) / max * 100) + "%"; };
     lo.addEventListener("input", up); hi.addEventListener("input", up); up(); });
-  build(); load(); setInterval(load, 10000);
+  async function loadCsv(d) {
+    last = d;
+    try { const r = await fetch(`${API}?minutes=60&light=1`, { cache: "no-store" }); renderShell(await r.json()); } catch (e) {}
+    $("#updated").textContent = `Dữ liệu đến ${new Date(d.now).toLocaleString("vi-VN", { hour12: false, hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" })}`;
+    $("#pill").className = "pill ok"; $("#pill").textContent = "Nguồn tệp CSV";
+    forecast(d);
+  }
+  const csvEl = document.getElementById("csv-data");
+  const form = $("#csvForm"), file = $("#csvFile"), drop = $("#drop");
+  if (file) {
+    file.addEventListener("change", () => file.files.length && form.submit());
+    ["dragover", "dragenter"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+    ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove("over")));
+    drop.addEventListener("drop", (e) => { e.preventDefault(); if (e.dataTransfer.files.length) { file.files = e.dataTransfer.files; form.submit(); } });
+  }
+  build();
+  if (csvEl) loadCsv(JSON.parse(csvEl.textContent));
+  else { load(); setInterval(load, 10000); }
 })();

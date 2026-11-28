@@ -1,5 +1,6 @@
 {% extends 'monitor/base.html' %}{% block title %}Cài đặt{% endblock %}{% block content %}
-<div class="page-head"><div><h1>Cài đặt hệ thống</h1><p class="sub">Thiết lập ngưỡng an toàn, thông báo và quản lý thiết bị.</p></div></div>
+<div class="page-head"><div><h1>Cài đặt hệ thống</h1><p class="sub">Thiết lập ngưỡng an toàn, thông báo và quản lý thiết bị.</p></div>
+<form method="post" action="{% url 'admin_logout' %}">{% csrf_token %}<button class="btn ghost" type="submit">Khóa cài đặt</button></form></div>
 {% if error %}<div class="err" role="alert">{{ error }}</div>{% endif %}{% if saved %}<div class="okmsg" role="status">Đã lưu thay đổi.</div>{% endif %}
 <form method="post">{% csrf_token %}
 <div class="set-grid"><div class="card"><h2>Ngưỡng cảnh báo</h2><p class="sub">Cảnh báo khi giá trị nằm ngoài khoảng đã thiết lập.</p>

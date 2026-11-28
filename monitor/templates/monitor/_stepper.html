@@ -1,0 +1,4 @@
+<ol class="stepper" aria-label="Các bước">
+<li class="{% if step > 1 %}done{% elif step == 1 %}cur{% endif %}"><span>{% if step > 1 %}✓{% else %}1{% endif %}</span>Chọn tệp CSV</li><li class="arrow">→</li>
+<li class="{% if step > 2 %}done{% elif step == 2 %}cur{% endif %}"><span>{% if step > 2 %}✓{% else %}2{% endif %}</span>Kiểm tra dữ liệu</li><li class="arrow">→</li>
+<li class="{% if step == 3 %}cur{% endif %}"><span>3</span>Xem dự báo</li></ol>

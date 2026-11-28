@@ -1,8 +1,11 @@
+import hmac
 import json
 import logging
 import math
+import time as _time
 import urllib.error
 import urllib.request
+from types import SimpleNamespace
 from datetime import datetime, time, timedelta
 
 from django.conf import settings
@@ -10,12 +13,12 @@ from django.core.paginator import Paginator
 from django.core.cache import cache
 
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from . import exports
+from . import csv_import, exports
 from .advice import build_advice
 from .models import AlertSetting, Reading
 
@@ -213,6 +216,7 @@ def api_ingest(request):
 
 # ---------------------------------------------------------------- Các trang giao diện
 def _page(request, name, page, **extra):
+    extra.setdefault("nav", page)
     return render(request, f"monitor/{name}.html", {"page": page, "location": settings.LOCATION_NAME, **extra})
 
 
@@ -272,6 +276,8 @@ def history(request):
 
 
 def settings_page(request):
+    if not _is_admin(request):
+        return _page(request, "settings_gate", "settings", error=None)
     cfg = AlertSetting.load()
     error = saved = None
     if request.method == "POST":
@@ -296,3 +302,151 @@ def settings_page(request):
     latest = Reading.objects.first()
     return _page(request, "settings", "settings", cfg=cfg, error=error, saved=saved, latest=latest,
                  device=latest.device if latest else "esp32-01", sensor=settings.SENSOR_TYPE)
+
+
+# ---------------------------------------------------------------- Mật khẩu quản trị cho Cài đặt
+ADMIN_KEY = "admin_ok_until"
+ADMIN_SECONDS = 30 * 60
+MAX_FAILS, FAIL_WINDOW = 5, 60
+
+
+def _is_admin(request):
+    return request.session.get(ADMIN_KEY, 0) > _time.time()
+
+
+@require_POST
+def admin_login(request):
+    ip = request.META.get("REMOTE_ADDR", "?")
+    key = f"monitor:admin_fail:{ip}"
+    password = request.POST.get("password", "")
+    if not settings.ADMIN_PASSWORD:
+        error = "Máy chủ chưa đặt ADMIN_PASSWORD nên chưa thể mở Cài đặt."
+    elif cache.get(key, 0) >= MAX_FAILS:
+        error = "Nhập sai quá nhiều lần. Vui lòng thử lại sau 1 phút."
+    elif not password:
+        error = "Vui lòng nhập mật khẩu quản trị để tiếp tục."
+    elif hmac.compare_digest(password.encode(), settings.ADMIN_PASSWORD.encode()):
+        cache.delete(key)
+        request.session.cycle_key()
+        request.session[ADMIN_KEY] = _time.time() + ADMIN_SECONDS
+        return redirect("settings")
+    else:
+        cache.set(key, cache.get(key, 0) + 1, FAIL_WINDOW)
+        error = "Mật khẩu không đúng."
+    return _page(request, "settings_gate", "settings", error=error)
+
+
+@require_POST
+def admin_logout(request):
+    request.session.pop(ADMIN_KEY, None)
+    return redirect("overview")
+
+
+# ---------------------------------------------------------------- Dự báo từ tệp CSV
+def _csv_state(request):
+    return csv_import.load(request.session.get("csv_token"))
+
+
+def csv_upload(request):
+    error = None
+    if request.method == "POST":
+        f = request.FILES.get("file")
+        if not f:
+            error = "Vui lòng chọn một tệp CSV."
+        elif not f.name.lower().endswith(".csv"):
+            error = "Chỉ hỗ trợ tệp định dạng .csv."
+        elif f.size > csv_import.MAX_BYTES:
+            error = "Tệp vượt quá 10 MB."
+        else:
+            info, errors = csv_import.analyse(f.read(), f.name[:120])
+            if info is None:
+                error = errors[0]
+            else:
+                request.session["csv_token"] = csv_import.save({"info": info, "errors": errors})
+                return redirect("csv_check")
+    return _page(request, "csv_upload", "csv_upload", nav="forecast", error=error, step=1)
+
+
+def _local(ms, fmt):
+    return timezone.localtime(datetime.fromtimestamp(ms / 1000, timezone.get_current_timezone())).strftime(fmt)
+
+
+def csv_check(request, run_error=None):
+    state = _csv_state(request)
+    if not state:
+        return redirect("csv_upload")
+    info, errors = state["info"], state["errors"]
+    checks = [
+        (True, "Đủ 3 cột bắt buộc"),
+        (not (info["missing"] or info["skipped"]),
+         f"{info['missing'] + info['skipped']} dòng bị thiếu hoặc không hợp lệ (đã bỏ qua)" if info["missing"] or info["skipped"] else "0 giá trị bị thiếu"),
+        (not info["dup"], f"{info['dup']} dòng trùng thời gian (giữ dòng sau)" if info["dup"] else "Không trùng thời gian"),
+        (info["step"] is not None, f"Chu kỳ đo khoảng {info['step']:g} phút" if info["step"] is not None else "Chưa xác định chu kỳ đo"),
+        (not info["gap_hours"], f"Đủ {csv_import.NEED_HOURS} giờ liên tục" if not info["gap_hours"] else f"Thiếu {info['gap_hours']} giờ trong {csv_import.NEED_HOURS} giờ gần nhất"),
+    ]
+    preview = [{"time": _local(r[0], "%d/%m/%Y · %H:%M:%S"), "t": r[1], "h": r[2]} for r in info["rows"][-4:]]
+    return _page(request, "csv_check", "csv_check", nav="forecast", step=2, info=info, errors=errors, ok=not errors,
+                 checks=checks, preview=preview, size_kb=f"{info['size'] / 1024:.1f}".replace(".", ","),
+                 start=_local(info["start"], "%d/%m %H:%M"), end=_local(info["end"], "%d/%m %H:%M"), run_error=run_error)
+
+
+def _csv_call_ai(rows):
+    """Gộp theo giờ (72 giờ cuối) rồi gọi AI. Không bù từ Open-Meteo để kết quả chỉ dựa trên tệp của người dùng."""
+    tz = timezone.get_current_timezone()
+    buckets = {}
+    for ms, t, h in rows:
+        buckets.setdefault(ms // 3_600_000, []).append((t, h))
+    readings = [{"time": datetime.fromtimestamp(k * 3600, tz).isoformat(),
+                 "temperature": sum(v[0] for v in vs) / len(vs), "humidity": sum(v[1] for v in vs) / len(vs)}
+                for k, vs in sorted(buckets.items())[-72:]]
+    req = urllib.request.Request(
+        f"{settings.AI_SERVICE_URL}/forecast",
+        data=json.dumps({"readings": readings, "fill_with_open_meteo": False}).encode(),
+        headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return json.loads(resp.read())
+
+
+@require_POST
+def csv_run(request):
+    state = _csv_state(request)
+    if not state:
+        return redirect("csv_upload")
+    if state["errors"]:
+        return redirect("csv_check")
+    info = state["info"]
+    try:
+        result = _csv_call_ai(info["rows"])
+        end_dt = datetime.fromtimestamp(info["end"] / 1000, timezone.get_current_timezone())
+        state["points"] = _format_predictions(result, end_dt)
+    except urllib.error.HTTPError as e:
+        try:
+            detail = json.loads(e.read()).get("detail")
+        except (ValueError, AttributeError):
+            detail = None
+        return csv_check(request, run_error=f"Dịch vụ dự báo từ chối dữ liệu: {detail or e.code}")
+    except (urllib.error.URLError, TimeoutError):
+        return csv_check(request, run_error="Không kết nối được dịch vụ dự báo. Hãy kiểm tra ai_service rồi thử lại.")
+    except (KeyError, TypeError, ValueError):
+        logger.exception("CSV forecast invalid")
+        return csv_check(request, run_error="Dịch vụ dự báo trả về kết quả không hợp lệ.")
+    csv_import.save(state, request.session["csv_token"])
+    return redirect("csv_result")
+
+
+def csv_result(request):
+    state = _csv_state(request)
+    if not state or "points" not in state:
+        return redirect("csv_check" if state else "csv_upload")
+    info, points = state["info"], state["points"]
+    last = info["rows"][-1]
+    recent = [r for r in info["rows"] if r[0] >= last[0] - 3 * 3600_000]
+    stride = max(1, -(-len(recent) // 150))
+    history = [{"t": r[0], "temperature": round(r[1], 2), "humidity": round(r[2], 2)} for r in recent[::stride]]
+    data = {"source": "csv", "now": last[0], "count": info["count"], "location": settings.LOCATION_NAME,
+            "latest": {"t": last[0], "temperature": round(last[1], 1), "humidity": round(last[2], 1)},
+            "history": history,
+            "forecast": {"model": "LSTM + ARIMA + Random Forest", "horizon": FORECAST_HORIZON, "points": points, "error": None},
+            "advice": build_advice(SimpleNamespace(temperature=last[1], humidity=last[2]), points)}
+    return _page(request, "forecast", "forecast", csv=True, csv_data=data, csv_name=info["name"], csv_count=info["count"],
+                 csv_from=_local(info["end"], "%H:%M"), csv_to=_local(points[-1]["t"], "%H:%M"))
