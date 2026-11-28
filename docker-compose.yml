@@ -33,7 +33,6 @@ services:
       DJANGO_DEBUG: "false"
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       INGEST_API_KEY: ${INGEST_API_KEY:-test-api-key}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       AI_SERVICE_URL: http://ai_service:8001
     volumes:
       - ./db.sqlite3:/app/db.sqlite3

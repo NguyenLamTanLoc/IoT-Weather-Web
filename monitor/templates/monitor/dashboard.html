@@ -1,0 +1,74 @@
+{% load static %}<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nhiệt độ và độ ẩm – {{ location }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'monitor/css/dashboard.css' %}">
+</head>
+<body data-api="{% url 'api_dashboard' %}" data-export="{% url 'api_export' %}">
+  <header class="top">
+    <div>
+      <h1>Nhiệt độ và độ ẩm</h1>
+      <p class="where">{{ location }}</p>
+    </div>
+    <div class="status" id="status" data-state="loading" role="status">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="statusText">Đang tải số liệu</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="reading reading--temp" aria-labelledby="tLabel">
+      <h2 id="tLabel">Nhiệt độ hiện tại</h2>
+      <p class="value"><span id="tNow">–</span><span class="unit">°C</span></p>
+      <p class="outlook" id="tOutlook">Chưa có dự báo</p>
+    </section>
+
+    <section class="reading reading--hum" aria-labelledby="hLabel">
+      <h2 id="hLabel">Độ ẩm không khí</h2>
+      <p class="value"><span id="hNow">–</span><span class="unit">%</span></p>
+      <p class="outlook" id="hOutlook">Chưa có dự báo</p>
+    </section>
+
+    <section class="chart-panel" aria-labelledby="cTitle">
+      <div class="chart-head">
+        <div>
+          <h2 id="cTitle">Diễn biến và dự báo</h2>
+          <p class="hint">Phần nền xanh bên phải là dự báo 6 giờ tới.</p>
+        </div>
+        <div class="tabs" role="group" aria-label="Khoảng thời gian hiển thị">
+          {% for minutes, label in ranges %}
+          <button type="button" class="tab" data-range="{{ minutes }}" aria-pressed="{% if minutes == 180 %}true{% else %}false{% endif %}">{{ label }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="canvas-wrap"><canvas id="chart" aria-label="Biểu đồ nhiệt độ và độ ẩm theo thời gian" role="img"></canvas></div>
+      <p class="export">Tải số liệu của khoảng đang chọn:
+        <a id="exportCsv" href="#" download>CSV để thống kê</a>
+        <a id="exportJson" href="#" download>JSON cho AI</a>
+      </p>
+    </section>
+
+    <section class="advice" aria-labelledby="aTitle">
+      <h2 id="aTitle">Gợi ý cho 6 giờ tới</h2>
+      <ul id="adviceList" class="advice-list"><li class="advice-item" data-level="loading"><p class="detail">Đang phân tích số liệu…</p></li></ul>
+    </section>
+
+    <section class="forecast-table" aria-labelledby="fTitle">
+      <h2 id="fTitle">Dự báo chi tiết</h2>
+      <table>
+        <thead><tr><th scope="col">Sau</th><th scope="col">Nhiệt độ</th><th scope="col">Độ ẩm</th></tr></thead>
+        <tbody id="forecastRows"><tr><td colspan="3" class="empty">Chưa có dự báo</td></tr></tbody>
+      </table>
+      <p class="model" id="modelName"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="{% static 'monitor/js/dashboard.js' %}"></script>
+</body>
+</html>
