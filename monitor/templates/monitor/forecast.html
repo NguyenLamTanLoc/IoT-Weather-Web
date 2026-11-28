@@ -1,7 +1,7 @@
 {% extends 'monitor/base.html' %}{% block title %}Dự báo{% endblock %}{% block content %}
 <div class="page-head"><div>{% if csv %}<h1>Dự báo từ tệp CSV</h1><p class="sub">{{ csv_name }} · {{ csv_count }} bản ghi hợp lệ · Dự báo {{ csv_from }}–{{ csv_to }}</p>{% else %}<h1>Dự báo khí hậu</h1><p class="sub">Nhìn trước 6 giờ để chăm sóc không gian tốt hơn.</p>{% endif %}</div>
 {% if csv %}<a class="btn ghost" href="{% url 'csv_upload' %}">Chọn tệp khác</a>{% else %}<a class="btn" href="{% url 'csv_upload' %}">Tải CSV lên</a>{% endif %}</div>
-<div class="banner" id="fcBanner">✧ Dự báo AI từ dữ liệu ESP32 · Đang tải…</div>
+<div class="banner" id="fcBanner">Dự báo AI từ dữ liệu ESP32 · Đang tải…</div>
 <div class="grid2"><div class="card"><h2 id="fcTitle">Nhiệt độ trong 6 giờ tới</h2>
 <div class="tabs"><button class="on" data-metric="temperature">Nhiệt độ</button><button data-metric="humidity">Độ ẩm</button></div>
 <div class="chart-box"><canvas id="chart" role="img" aria-label="Biểu đồ dự báo"></canvas></div></div>

@@ -16,8 +16,8 @@
     pill.textContent = d.latest ? (on ? "ESP32 trực tuyến" : "ESP32 mất kết nối") : "Chưa có số liệu";
     $("#updated").textContent = d.latest ? `${on ? "Cập nhật" : "Số liệu cuối"} lúc ${hhmmss(d.latest.t)}` : "Chưa có số liệu";
     $("#sideStatus").innerHTML = on
-      ? `Kết nối ổn định<b>● 1 thiết bị trực tuyến</b>${esc(d.latest.device)} · Cảm biến`
-      : `Chưa có kết nối<b style="color:var(--bad)">● Thiết bị ngoại tuyến</b>Kiểm tra nguồn và Wi-Fi của ESP32`;
+      ? `Kết nối ổn định<b>1 thiết bị trực tuyến</b>${esc(d.latest.device)} · Cảm biến`
+      : `Chưa có kết nối<b style="color:var(--bad)">Thiết bị ngoại tuyến</b>Kiểm tra nguồn và Wi-Fi của ESP32`;
     if (PAGE.startsWith("csv_")) { $("#updated").textContent = "Nhập dữ liệu thô từ tệp CSV"; pill.className = "pill ok"; pill.textContent = "Nhập dữ liệu CSV"; }
     const dp = $("#devPill"); if (dp) { dp.className = pill.className; dp.textContent = on ? "Trực tuyến" : "Ngoại tuyến"; }
   }
@@ -51,7 +51,7 @@
     const ref = d.history.find((p) => p.t >= d.now - 3600000);
     if (!ref || d.now - d.history[0].t < 3000000) { el.textContent = "Chưa đủ dữ liệu 1 giờ"; return; }
     const diff = d.latest[key] - ref[key];
-    el.textContent = `${diff >= 0 ? "↗" : "↘"} ${num(Math.abs(diff), digits)}${unit} so với 1 giờ trước`;
+    el.textContent = `${diff >= 0 ? "Tăng" : "Giảm"} ${num(Math.abs(diff), digits)}${unit} so với 1 giờ trước`;
   }
   function overview(d) {
     $("#tNow").textContent = d.latest ? num(d.latest.temperature, d.decimals) : "–";
@@ -60,7 +60,7 @@
     const worst = d.advice.find((a) => a.level === "alert") || d.advice.find((a) => a.level === "warn");
     const st = $("#state"); st.textContent = !d.latest ? "–" : worst ? (worst.level === "alert" ? "Cần xử lý" : "Cần chú ý") : "Bình thường";
     st.style.color = worst ? (worst.level === "alert" ? "var(--bad)" : "var(--warn)") : "var(--ok)";
-    $("#stateNote").textContent = !d.latest ? "" : worst ? `● ${worst.title}` : "● Các chỉ số trong ngưỡng";
+    $("#stateNote").textContent = !d.latest ? "" : worst ? worst.title : "Các chỉ số trong ngưỡng";
     const n = d.forecast.points[0];
     $("#next").textContent = n ? `${num(n.temperature)}°C / ${num(n.humidity, 0)}%` : "–";
     $("#nextNote").textContent = n ? `Lúc ${hhmm(n.t)}` : (d.forecast.error || "Chưa có dự báo");
@@ -70,15 +70,15 @@
     chart.options.scales.x.min = d.now - range * 60000; chart.options.scales.x.max = d.now + d.forecast.horizon * 60000;
     chart.options.plugins.nowLine.now = d.now; chart.update("none");
     const cls = { alert: "q-warn", warn: "q-info", ok: "q-ok" };
-    $("#quick").innerHTML = d.advice.slice(0, 3).map((a) => `<div class="${cls[a.level] || "q-ok"}"><b>✧ ${esc(a.title)}</b>${esc(a.detail)}</div>`).join("");
+    $("#quick").innerHTML = d.advice.slice(0, 3).map((a) => `<div class="${cls[a.level] || "q-ok"}"><b>${esc(a.title)}</b>${esc(a.detail)}</div>`).join("");
   }
 
   /* ---- Dự báo ---- */
   function forecast(d) {
     const pts = d.forecast.points, t = metric === "temperature", c = t ? C.temp : C.hum, u = t ? "°C" : "%", dg = t ? 1 : 0, lo = t ? "t_lo" : "h_lo", hi = t ? "t_hi" : "h_hi";
-    const csvBanner = d.source === "csv" ? `✧ Nguồn: tệp CSV · ${d.count} bản ghi · Dữ liệu kết thúc lúc ${hhmm(d.now)} · Không ảnh hưởng dữ liệu trực tiếp` : null;
-    $("#fcBanner").textContent = csvBanner || pts.length ? `✧ Dự báo AI (${d.forecast.model}) · Cập nhật lúc ${hhmm(d.now)} · Từ ${hhmm(pts[0].t)} đến ${hhmm(pts[pts.length - 1].t)}`
-      : `✧ ${d.forecast.error || "Chưa có dự báo. Cần có số liệu từ cảm biến ESP32."}`;
+    const csvBanner = d.source === "csv" ? `Nguồn: tệp CSV · ${d.count} bản ghi · Dữ liệu kết thúc lúc ${hhmm(d.now)} · Không ảnh hưởng dữ liệu trực tiếp` : null;
+    $("#fcBanner").textContent = csvBanner || pts.length ? `Dự báo AI (${d.forecast.model}) · Cập nhật lúc ${hhmm(d.now)} · Từ ${hhmm(pts[0].t)} đến ${hhmm(pts[pts.length - 1].t)}`
+      : `${d.forecast.error || "Chưa có dự báo. Cần có số liệu từ cảm biến ESP32."}`;
     $("#fcTitle").textContent = `${t ? "Nhiệt độ" : "Độ ẩm"} trong 6 giờ tới`;
     const band = (k) => (pts.length && d.latest ? [{ x: d.latest.t, y: d.latest[metric] }, ...pts.map((p) => ({ x: p.t, y: p[k] }))] : []);
     chart.data.datasets = [ln("lo", c, { data: band(lo), borderWidth: 0, fill: false }), ln("Vùng dao động giữa 3 mô hình", c, { data: band(hi), borderWidth: 0, fill: "-1", backgroundColor: c + "33" }),
@@ -100,10 +100,10 @@
   let filter = "all";
   function suggestions(d) {
     const A = d.advice, urgent = A.filter((a) => a.level === "alert").length, warn = A.filter((a) => a.level === "warn").length;
-    $("#sgBanner").textContent = `✧ ${urgent} việc cần ưu tiên · ${warn} khuyến nghị đang chờ bạn · Phân tích lúc ${hhmm(d.now)}`;
+    $("#sgBanner").textContent = `${urgent} việc cần ưu tiên · ${warn} khuyến nghị đang chờ bạn · Phân tích lúc ${hhmm(d.now)}`;
     $$("#chips button").forEach((b) => { const n = b.dataset.level === "all" ? A.length : b.dataset.level === "alert" ? urgent : warn; b.textContent = b.textContent.replace(/ \(\d+\)$/, "") + ` (${n})`; });
     const list = A.filter((a) => filter === "all" || a.level === filter);
-    $("#sgList").innerHTML = list.length ? list.map((a) => `<div class="card sg"><div class="ico"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></div><div class="body"><h3>${esc(a.title)}</h3><p>${esc(a.detail)}</p></div><span class="pill ${LEVEL[a.level][1]}">${LEVEL[a.level][0]}</span></div>`).join("")
+    $("#sgList").innerHTML = list.length ? list.map((a) => `<div class="card sg"><div class="body"><h3>${esc(a.title)}</h3><p>${esc(a.detail)}</p></div><span class="pill ${LEVEL[a.level][1]}">${LEVEL[a.level][0]}</span></div>`).join("")
       : '<div class="card empty">Không có gợi ý nào ở mức này.</div>';
   }
 

@@ -6,7 +6,7 @@
 <div style="display:flex;gap:16px;align-items:center"><span class="pill {% if ok %}ok{% else %}bad{% endif %}">{% if ok %}Dữ liệu hợp lệ{% else %}Chưa đủ điều kiện{% endif %}</span><a class="btn ghost" href="{% url 'csv_upload' %}">Đổi tệp</a></div></div>
 <div class="card" style="margin-bottom:24px"><div class="page-head" style="margin:0 0 12px"><h2 style="margin:0">Xem trước dữ liệu</h2><span class="sub">4 bản ghi cuối / {{ info.count }} bản ghi</span></div>
 <table><thead><tr><th>Thời gian (thoi_gian)</th><th>Nhiệt độ (nhiet_do)</th><th>Độ ẩm (do_am)</th></tr></thead><tbody>{% for r in preview %}<tr><td>{{ r.time }}</td><td>{{ r.t|floatformat:"-1" }}°C</td><td>{{ r.h|floatformat:"-1" }}%</td></tr>{% endfor %}</tbody></table></div>
-<ul class="checks">{% for good, text in checks %}<li class="{% if good %}good{% else %}bad{% endif %}">{% if good %}✓{% else %}!{% endif %} {{ text }}</li>{% endfor %}</ul>
+<ul class="checks">{% for good, text in checks %}<li class="{% if good %}good{% else %}bad{% endif %}">{{ text }}</li>{% endfor %}</ul>
 {% if errors %}<div class="err" role="alert">{% for e in errors %}{{ e }}<br>{% endfor %}</div>{% endif %}
 <div class="savebar" style="justify-content:space-between"><a class="btn gray" href="{% url 'csv_upload' %}">Quay lại</a>
 <form method="post" action="{% url 'csv_run' %}" style="display:flex;align-items:center;gap:24px">{% csrf_token %}<span>Dự báo 6 giờ sau bản ghi cuối cùng</span><button class="btn" type="submit" {% if not ok %}disabled{% endif %}>Chạy dự báo</button></form></div>

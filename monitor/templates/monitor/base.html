@@ -5,22 +5,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'monitor/css/climateai.css' %}"></head>
 <body data-page="{{ page }}" data-api="{% url 'api_dashboard' %}">
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<symbol id="i-grid" viewBox="0 0 20 20"><path d="M2.5 2.5H8.33333V8.33333H2.5V2.5ZM11.6667 2.5H17.5V8.33333H11.6667V2.5ZM2.5 11.6667H8.33333V17.5H2.5V11.6667ZM11.6667 11.6667H17.5V17.5H11.6667V11.6667Z"/></symbol>
-<symbol id="i-chart" viewBox="0 0 20 20"><path d="M2.5 15.8333H17.5M3.33333 12.4999L7.5 7.49992L11.6667 9.99992L16.6667 3.33325"/></symbol>
-<symbol id="i-bulb" viewBox="0 0 20 20"><path d="M7.5 15.0001H12.5M8.33333 17.5001H11.6667M6.66667 11.6667C5.9119 10.9916 5.3799 10.1033 5.14106 9.11924C4.90223 8.13518 4.96781 7.1018 5.32914 6.15583C5.69047 5.20986 6.3305 4.3959 7.16456 3.82166C7.99862 3.24741 8.98738 2.93994 10 2.93994C11.0126 2.93994 12.0014 3.24741 12.8354 3.82166C13.6695 4.3959 14.3095 5.20986 14.6709 6.15583C15.0322 7.1018 15.0978 8.13518 14.8589 9.11924C14.6201 10.1033 14.0881 10.9916 13.3333 11.6667L12.5 13.3334H7.5L6.66667 11.6667Z"/></symbol>
-<symbol id="i-clock" viewBox="0 0 20 20"><path d="M10 5.83333V10L13.3333 11.6667M10 2.5C11.4834 2.5 12.9334 2.93987 14.1668 3.76398C15.4001 4.58809 16.3614 5.75943 16.9291 7.12987C17.4968 8.50032 17.6453 10.0083 17.3559 11.4632C17.0665 12.918 16.3522 14.2544 15.3033 15.3033C14.2544 16.3522 12.918 17.0665 11.4632 17.3559C10.0083 17.6453 8.50032 17.4968 7.12987 16.9291C5.75943 16.3614 4.58809 15.4001 3.76398 14.1668C2.93987 12.9334 2.5 11.4834 2.5 10C2.5 8.01088 3.29018 6.10322 4.6967 4.6967C6.10322 3.29018 8.01088 2.5 10 2.5Z"/></symbol>
-<symbol id="i-sun" viewBox="0 0 20 20"><path d="M10 2.5V5M10 15V17.5M2.5 10H5M15 10H17.5M4.66667 4.66667L6.33333 6.33333M13.6667 13.6667L15.3333 15.3333M4.66667 15.3333L6.33333 13.6667M13.6667 6.33333L15.3333 4.66667M10 6.66667C10.8841 6.66667 11.7319 7.01786 12.357 7.64298C12.9821 8.2681 13.3333 9.11594 13.3333 10C13.3333 10.8841 12.9821 11.7319 12.357 12.357C11.7319 12.9821 10.8841 13.3333 10 13.3333C9.11594 13.3333 8.2681 12.9821 7.64298 12.357C7.01786 11.7319 6.66667 10.8841 6.66667 10C6.66667 9.11594 7.01786 8.2681 7.64298 7.64298C8.2681 7.01786 9.11594 6.66667 10 6.66667Z"/></symbol>
-<symbol id="i-leaf" viewBox="0 0 20 20"><path d="M4 16C4 9 8 4 16 3.5C16 11 12 16 5.5 16M4 16L11 9"/></symbol></defs></svg>
-<aside class="sidebar"><div class="logo"><svg class="ic"><use href="#i-leaf"/></svg>ClimateAI</div><div class="nav-label">Không gian làm việc</div>
+<aside class="sidebar"><div class="logo">ClimateAI</div><div class="nav-label">Không gian làm việc</div>
 <nav class="nav">
-<a href="{% url 'overview' %}" class="{% if nav == 'overview' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg>Tổng quan</a>
-<a href="{% url 'forecast' %}" class="{% if nav == 'forecast' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Dự báo</a>
-<a href="{% url 'suggestions' %}" class="{% if nav == 'suggestions' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg>Gợi ý</a>
-<a href="{% url 'history' %}" class="{% if nav == 'history' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Lịch sử</a>
-<a href="{% url 'settings' %}" class="{% if nav == 'settings' %}active{% endif %}"><svg class="ic" aria-hidden="true"><use href="#i-sun"/></svg>Cài đặt</a></nav>
+<a href="{% url 'overview' %}" class="{% if nav == 'overview' %}active{% endif %}">Tổng quan</a>
+<a href="{% url 'forecast' %}" class="{% if nav == 'forecast' %}active{% endif %}">Dự báo</a>
+<a href="{% url 'suggestions' %}" class="{% if nav == 'suggestions' %}active{% endif %}">Gợi ý</a>
+<a href="{% url 'history' %}" class="{% if nav == 'history' %}active{% endif %}">Lịch sử</a>
+<a href="{% url 'settings' %}" class="{% if nav == 'settings' %}active{% endif %}">Cài đặt</a></nav>
 <div class="side-status" id="sideStatus">Đang kiểm tra kết nối<b>…</b>ESP32 · Cảm biến</div><div class="version">Phiên bản 1.0 · Trợ lý khí hậu</div></aside>
-<div class="main"><header class="topbar"><label class="loc"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg><select aria-label="Không gian"><option>{{ location }}</option></select></label>
+<div class="main"><header class="topbar"><label class="loc"><select aria-label="Không gian"><option>{{ location }}</option></select></label>
 <div class="right"><span id="updated">Đang tải…</span><span class="pill off" id="pill" role="status">Chưa có số liệu</span><div class="avatar" aria-hidden="true"></div></div></header>
 <main class="content">{% block content %}{% endblock %}</main></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
