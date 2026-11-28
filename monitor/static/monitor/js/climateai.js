@@ -101,7 +101,7 @@
     $("#sgBanner").textContent = `✧ ${urgent} việc cần ưu tiên · ${warn} khuyến nghị đang chờ bạn · Phân tích lúc ${hhmm(d.now)}`;
     $$("#chips button").forEach((b) => { const n = b.dataset.level === "all" ? A.length : b.dataset.level === "alert" ? urgent : warn; b.textContent = b.textContent.replace(/ \(\d+\)$/, "") + ` (${n})`; });
     const list = A.filter((a) => filter === "all" || a.level === filter);
-    $("#sgList").innerHTML = list.length ? list.map((a) => `<div class="card sg"><div class="ico">💡</div><div class="body"><h3>${esc(a.title)}</h3><p>${esc(a.detail)}</p></div><span class="pill ${LEVEL[a.level][1]}">${LEVEL[a.level][0]}</span></div>`).join("")
+    $("#sgList").innerHTML = list.length ? list.map((a) => `<div class="card sg"><div class="ico"><svg class="ic" aria-hidden="true"><use href="#i-bulb"/></svg></div><div class="body"><h3>${esc(a.title)}</h3><p>${esc(a.detail)}</p></div><span class="pill ${LEVEL[a.level][1]}">${LEVEL[a.level][0]}</span></div>`).join("")
       : '<div class="card empty">Không có gợi ý nào ở mức này.</div>';
   }
 
