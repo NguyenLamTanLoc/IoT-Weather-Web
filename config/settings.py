@@ -156,7 +156,6 @@ LOCATION_NAME = "Phòng kính số 1"          # tên hiển thị trên giao di
 
 # Khoá API mà ESP32 gửi kèm (header X-API-Key) khi POST dữ liệu lên /api/ingest/
 INGEST_API_KEY = os.environ.get("INGEST_API_KEY", "test-api-key")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")   # mật khẩu vào trang Cài đặt; để trống = khóa hẳn
 
 # Ngưỡng dùng để sinh gợi ý (chỉnh theo loại phòng/cây trồng)
 THRESHOLDS = {
