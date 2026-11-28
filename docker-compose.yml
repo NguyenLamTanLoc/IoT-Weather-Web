@@ -1,0 +1,42 @@
+services:
+  ai_service:                      # FastAPI + models (TensorFlow lives only here)
+    build: ./ai_service
+    image: iot-ai-service
+    ports:
+      - "8001:8001"                # optional: lets you open http://localhost:8001/docs
+    environment:
+      # Optional: override alert thresholds
+      # T_MIN: "20"
+      # T_MAX: "35"
+      # H_MIN: "40"
+      # H_MAX: "90"
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - ./ai_service/models:/app/models:ro     # swap model files without rebuilding
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s            # models take a while to load
+    restart: unless-stopped
+
+  web:                          # Django
+    build:
+      context: .
+      dockerfile: monitor/Dockerfile
+    image: iot-web
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DJANGO_DEBUG: "false"
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      INGEST_API_KEY: ${INGEST_API_KEY:-test-api-key}
+      AI_SERVICE_URL: http://ai_service:8001
+    volumes:
+      - ./db.sqlite3:/app/db.sqlite3
+    depends_on:
+      ai_service:
+        condition: service_healthy
+    restart: unless-stopped
